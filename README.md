@@ -353,6 +353,14 @@
       .regions{grid-template-columns:1fr}
       .footer-grid{grid-template-columns:1fr 1fr}
     }
+    @media print{
+      header,.topline,.hero,section:not(#recipes),footer,.utility-bar,.filterbar,.close,.modal-toolbar,#modalCookBtn{display:none!important}
+      .modal{position:static;background:none!important;display:block!important;padding:0}
+      .modal-card{box-shadow:none;max-height:none;width:100%}
+      .modal-hero{grid-template-columns:1fr}
+      .modal-hero img{max-height:300px}
+      body{background:#fff!important}
+    }
     @media(max-width:640px){
       .hero{padding-top:20px}
       .hero-card{min-height:620px;border-radius:26px}
@@ -368,6 +376,38 @@
       .modal-info,.modal-grid{padding:25px}
       .modal-info h2{font-size:2.3rem}
     }
+
+    /* Enhanced app features */
+    .utility-bar{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 24px}
+    .utility-btn{border:1px solid var(--line);background:#fffdf8;color:var(--green);border-radius:13px;padding:10px 13px;font-weight:800}
+    .utility-btn:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(27,48,37,.08)}
+    .recipe-extra{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:13px}
+    .rating{font-size:.82rem;color:#9b6a22;font-weight:800}
+    .modal-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+    .mini-btn{border:1px solid var(--line);background:#fff;border-radius:11px;padding:9px 11px;font-weight:800;color:var(--green)}
+    .serving-control{display:flex;align-items:center;gap:9px;padding:7px 10px;border:1px solid var(--line);border-radius:11px;background:#fff;font-weight:800}
+    .serving-control button{width:28px;height:28px;border:0;border-radius:8px;background:#edf1eb;color:var(--green);font-weight:900}
+    .shopping-drawer{position:fixed;right:18px;bottom:18px;width:min(390px,calc(100% - 36px));background:var(--cream-2);border:1px solid var(--line);border-radius:22px;box-shadow:0 25px 70px rgba(0,0,0,.2);z-index:120;display:none;overflow:hidden}
+    .shopping-drawer.open{display:block}
+    .shopping-head{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;background:var(--green);color:#fff}
+    .shopping-list{max-height:310px;overflow:auto;padding:12px 16px;display:grid;gap:8px}
+    .shopping-item{display:flex;gap:9px;align-items:center;padding:9px;border-bottom:1px solid var(--line);font-size:.9rem}
+    .shopping-item input{accent-color:var(--orange)}
+    .drawer-actions{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--line)}
+    .toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);background:var(--green);color:#fff;padding:11px 16px;border-radius:99px;box-shadow:0 15px 35px rgba(0,0,0,.18);opacity:0;pointer-events:none;transition:.25s;z-index:250;font-weight:800}
+    .toast.show{opacity:1;transform:translate(-50%,0)}
+    .theme-dark{--cream:#111812;--cream-2:#172119;--ink:#eef5ef;--muted:#aab7ae;--line:rgba(255,255,255,.11);--card:#172119}
+    .theme-dark body{background:var(--cream)}
+    .theme-dark .quick-card,.theme-dark .utility-btn,.theme-dark .filter,.theme-dark .mini-btn,.theme-dark .serving-control,.theme-dark .ingredient-box,.theme-dark .suggestion,.theme-dark .recipe-card,.theme-dark .modal-card{background:var(--card);color:var(--ink)}
+    .theme-dark .search{background:#fff;color:#1d2721}
+    .theme-dark header{background:rgba(17,24,18,.88)}
+    .theme-dark .topline{background:#0b100c}
+    @media(max-width:640px){
+      .utility-bar{display:grid;grid-template-columns:1fr 1fr}
+      .utility-btn{width:100%}
+      .shopping-drawer{right:10px;bottom:10px;width:calc(100% - 20px)}
+    }
+
   </style>
 </head>
 <body>
@@ -386,6 +426,9 @@
         <a href="#planner">What Can I Cook?</a>
       </nav>
       <div class="nav-actions">
+        <button class="icon-btn" id="randomNav" title="Surprise me">🎲</button>
+        <button class="icon-btn" id="shoppingNav" title="Shopping list">🛒</button>
+        <button class="icon-btn" id="themeNav" title="Toggle theme">☾</button>
         <button class="icon-btn" id="favoriteNav" title="Show favorite recipes">♡</button>
       </div>
     </div>
@@ -409,6 +452,7 @@
             <div class="hero-buttons">
               <a href="#recipes" class="btn btn-primary">Explore Recipes →</a>
               <button class="btn btn-secondary" id="heroCookBtn">👨‍🍳 Cook Mode</button>
+              <button class="btn btn-secondary" id="heroRandomBtn">🎲 Surprise Me</button>
             </div>
           </div>
         </div>
@@ -445,7 +489,16 @@
           <button class="filter" data-filter="Pork">Pork</button>
           <button class="filter" data-filter="Seafood">Seafood</button>
           <button class="filter" data-filter="Soup">Soup</button>
+          <button class="filter" data-filter="Beef">Beef</button>
+          <button class="filter" data-filter="Vegetable">Vegetables</button>
+          <button class="filter" data-filter="Noodles">Noodles</button>
           <button class="filter" data-filter="Dessert">Dessert</button>
+        </div>
+        <div class="utility-bar">
+          <button class="utility-btn" id="randomBtn">🎲 Surprise Me</button>
+          <button class="utility-btn" id="favoritesBtn">♥ My Favorites</button>
+          <button class="utility-btn" id="clearSearchBtn">↺ Reset Filters</button>
+          <button class="utility-btn" id="shoppingBtn">🛒 Shopping List</button>
         </div>
 
         <div class="recipe-grid" id="recipeGrid"></div>
@@ -549,6 +602,12 @@
           <h2 id="modalTitle"></h2>
           <p id="modalDescription" style="color:var(--muted)"></p>
           <div class="modal-meta" id="modalMeta"></div>
+          <div class="modal-toolbar">
+            <div class="serving-control"><button id="servMinus">−</button><span id="servingText">4 servings</span><button id="servPlus">+</button></div>
+            <button class="mini-btn" id="addShopBtn">🛒 Add ingredients</button>
+            <button class="mini-btn" id="shareBtn">↗ Share</button>
+            <button class="mini-btn" id="printBtn">🖨 Print</button>
+          </div>
           <button class="btn btn-primary" id="modalCookBtn">👨‍🍳 Start Cook Mode</button>
         </div>
       </div>
@@ -564,6 +623,13 @@
       </div>
     </div>
   </div>
+
+  <div class="shopping-drawer" id="shoppingDrawer" aria-hidden="true">
+    <div class="shopping-head"><strong>🛒 My Shopping List</strong><button class="close" id="closeShopping" style="position:static;width:34px;height:34px">✕</button></div>
+    <div class="shopping-list" id="shoppingList"><div class="empty" style="padding:26px 12px;border:0">Your shopping list is empty.</div></div>
+    <div class="drawer-actions"><button class="mini-btn" id="clearShopping">Clear</button><button class="mini-btn" id="copyShopping">Copy list</button></div>
+  </div>
+  <div class="toast" id="toast"></div>
 
   <!-- Cook Mode -->
   <div class="cook-overlay" id="cookOverlay">
@@ -586,134 +652,151 @@
   <script>
     const recipes = [
       {
-        id:'adobo',
-        title:'Chicken Adobo',
-        category:'Chicken',
-        tags:['Easy','Chicken'],
-        region:'Luzon',
-        difficulty:'Easy',
-        time:'55 mins',
-        servings:'4 servings',
-        description:'Tender chicken simmered in a savory, tangy sauce with garlic and peppercorn.',
+        id:'adobo', title:'Chicken Adobo', category:'Chicken', tags:['Easy','Chicken','Dinner'], region:'Luzon',
+        difficulty:'Easy', time:'55 mins', servings:'4 servings', description:'Tender chicken simmered in a savory, tangy sauce with garlic and peppercorn.',
         image:'https://images.unsplash.com/photo-1604908177522-4023ab1b7a9d?auto=format&fit=crop&w=1200&q=85',
         ingredients:['1 kg chicken pieces','½ cup soy sauce','½ cup vinegar','8 cloves garlic, crushed','3 bay leaves','1 tsp whole peppercorns','1 cup water','1 tbsp cooking oil'],
-        steps:[
-          ['Prep the chicken','Pat the chicken dry and set aside. Gather the garlic, bay leaves, peppercorns, soy sauce, and vinegar.'],
-          ['Brown for flavor','Heat oil in a pot, then lightly brown the chicken pieces on both sides.'],
-          ['Build the sauce','Add garlic, soy sauce, vinegar, bay leaves, peppercorns, and water. Bring to a boil.'],
-          ['Simmer','Lower the heat and simmer uncovered for about 35–40 minutes, turning the chicken once or twice.'],
-          ['Reduce & serve','Let the sauce reduce until glossy and flavorful. Serve hot with rice.']
-        ]
+        steps:[['Prep the chicken','Pat the chicken dry and gather the aromatics and sauces.'],['Brown for flavor','Heat oil and lightly brown the chicken pieces.'],['Build the sauce','Add garlic, soy sauce, vinegar, bay leaves, peppercorns, and water. Bring to a boil.'],['Simmer','Lower the heat and cook until the chicken is tender, about 35–40 minutes.'],['Reduce & serve','Let the sauce become glossy. Serve hot with rice.']]
       },
       {
-        id:'sinigang',
-        title:'Sinigang na Baboy',
-        category:'Soup',
-        tags:['Pork','Soup'],
-        region:'Luzon',
-        difficulty:'Medium',
-        time:'1 hr 15 mins',
-        servings:'5 servings',
-        description:'A comforting sour tamarind soup packed with pork, vegetables, and deep savory flavor.',
+        id:'sinigang', title:'Sinigang na Baboy', category:'Soup', tags:['Pork','Soup','Dinner'], region:'Luzon',
+        difficulty:'Medium', time:'1 hr 15 mins', servings:'5 servings', description:'A comforting sour tamarind soup packed with pork, vegetables, and deep savory flavor.',
         image:'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1200&q=85',
         ingredients:['750 g pork belly or ribs','1.5 L water','2 tomatoes, quartered','1 onion, sliced','1 cup string beans','1 radish, sliced','1 eggplant, sliced','1–2 cups tamarind broth','2 cups kangkong','Fish sauce to taste'],
-        steps:[
-          ['Start the broth','Place pork, water, onion, and tomatoes in a pot. Bring to a boil and skim off excess foam.'],
-          ['Tenderize','Cover and simmer until the pork is tender, around 45–55 minutes depending on the cut.'],
-          ['Add vegetables','Add radish and eggplant first, then string beans. Simmer until just tender.'],
-          ['Make it sour','Pour in tamarind broth gradually and adjust the sourness to your taste.'],
-          ['Finish','Add kangkong and season with fish sauce. Cook for another 1–2 minutes, then serve.']
-        ]
+        steps:[['Start the broth','Simmer pork with water, onion, and tomatoes; skim foam.'],['Tenderize','Cover and simmer until the pork is tender.'],['Add vegetables','Add radish and eggplant, then string beans.'],['Make it sour','Add tamarind broth gradually and adjust the sourness.'],['Finish','Add kangkong and fish sauce, then serve.']]
       },
       {
-        id:'karekare',
-        title:'Kare-Kare',
-        category:'Pork',
-        tags:['Pork'],
-        region:'Luzon',
-        difficulty:'Hard',
-        time:'2 hrs',
-        servings:'6 servings',
-        description:'Rich peanut stew made special with tender meat, vegetables, and bagoong on the side.',
+        id:'karekare', title:'Kare-Kare', category:'Pork', tags:['Pork','Special Occasion'], region:'Luzon',
+        difficulty:'Hard', time:'2 hrs', servings:'6 servings', description:'Rich peanut stew made special with tender meat, vegetables, and bagoong on the side.',
         image:'https://images.unsplash.com/photo-1601050690117-94f5f6fa8bd7?auto=format&fit=crop&w=1200&q=85',
         ingredients:['1 kg oxtail or beef chunks','½ cup peanut butter','¼ cup ground toasted peanuts','1 onion, chopped','4 cloves garlic','2 tbsp annatto oil','2 tbsp rice flour','4 cups beef broth','Eggplant, pechay, and string beans','Bagoong alamang, for serving'],
-        steps:[
-          ['Tenderize the meat','Simmer oxtail or beef in water until tender. Reserve the broth.'],
-          ['Build the base','Sauté garlic and onion in annatto oil until fragrant.'],
-          ['Thicken','Add peanut butter, ground peanuts, rice flour, and reserved broth. Stir until smooth.'],
-          ['Combine','Return the tender meat to the sauce and simmer until rich and thick.'],
-          ['Add vegetables','Blanch the vegetables separately and arrange beside the kare-kare. Serve with bagoong.']
-        ]
+        steps:[['Tenderize the meat','Simmer oxtail or beef until tender and reserve the broth.'],['Build the base','Sauté garlic and onion in annatto oil.'],['Thicken','Add peanut butter, peanuts, rice flour, and broth.'],['Combine','Return the meat and simmer until rich and thick.'],['Add vegetables','Blanch vegetables separately and serve with bagoong.']]
       },
       {
-        id:'inasal',
-        title:'Chicken Inasal',
-        category:'Chicken',
-        tags:['Chicken','Easy'],
-        region:'Visayas',
-        difficulty:'Easy',
-        time:'50 mins',
-        servings:'4 servings',
-        description:'Char-grilled chicken marinated in calamansi, vinegar, garlic, and annatto oil.',
+        id:'inasal', title:'Chicken Inasal', category:'Chicken', tags:['Chicken','Easy','Grilled'], region:'Visayas',
+        difficulty:'Easy', time:'50 mins', servings:'4 servings', description:'Char-grilled chicken marinated in calamansi, vinegar, garlic, and annatto oil.',
         image:'https://images.unsplash.com/photo-1527477396000-e27163b481c2?auto=format&fit=crop&w=1200&q=85',
         ingredients:['1 kg chicken thighs or drumsticks','½ cup vinegar','½ cup calamansi juice','6 cloves garlic, minced','1 tbsp ginger, grated','1 tsp salt','1 tsp black pepper','Annatto oil for basting'],
-        steps:[
-          ['Marinate','Combine vinegar, calamansi, garlic, ginger, salt, and pepper. Marinate chicken for at least 2 hours.'],
-          ['Heat the grill','Prepare a medium-hot grill and oil the grates lightly.'],
-          ['Grill','Cook chicken slowly, turning often so it cooks evenly without burning.'],
-          ['Baste','Brush generously with annatto oil while grilling for color and flavor.'],
-          ['Rest & serve','Let the chicken rest for a few minutes, then serve with rice and your favorite dipping sauce.']
-        ]
+        steps:[['Marinate','Combine marinade ingredients and marinate chicken for at least 2 hours.'],['Heat the grill','Prepare a medium-hot grill and oil the grates lightly.'],['Grill','Cook slowly, turning often for even browning.'],['Baste','Brush with annatto oil while grilling.'],['Rest & serve','Rest briefly, then serve with rice and dipping sauce.']]
       },
       {
-        id:'sinigang-hipon',
-        title:'Sinigang na Hipon',
-        category:'Seafood',
-        tags:['Seafood','Soup','Easy'],
-        region:'Visayas',
-        difficulty:'Easy',
-        time:'35 mins',
-        servings:'4 servings',
-        description:'Bright, sour tamarind soup with juicy shrimp and crisp vegetables.',
+        id:'sinigang-hipon', title:'Sinigang na Hipon', category:'Seafood', tags:['Seafood','Soup','Easy'], region:'Visayas',
+        difficulty:'Easy', time:'35 mins', servings:'4 servings', description:'Bright, sour tamarind soup with juicy shrimp and crisp vegetables.',
         image:'https://images.unsplash.com/photo-1562565652-a0d8f0c59eb4?auto=format&fit=crop&w=1200&q=85',
         ingredients:['500 g large shrimp','1.2 L water','2 tomatoes, quartered','1 onion, sliced','1 cup radish','1 cup okra','1 cup string beans','1–2 cups tamarind broth','2 cups kangkong','Fish sauce to taste'],
-        steps:[
-          ['Make the broth','Boil water with onion and tomatoes until the vegetables soften and the broth smells savory.'],
-          ['Add sturdy vegetables','Add radish and okra. Simmer until nearly tender.'],
-          ['Add shrimp','Drop in the shrimp and cook just until pink and opaque, usually 3–5 minutes.'],
-          ['Add sourness','Stir in tamarind broth and adjust to taste.'],
-          ['Finish','Add kangkong and season with fish sauce. Serve immediately.']
-        ]
+        steps:[['Make the broth','Boil water with onion and tomatoes.'],['Add sturdy vegetables','Add radish and okra until nearly tender.'],['Add shrimp','Cook shrimp just until pink and opaque, 3–5 minutes.'],['Add sourness','Stir in tamarind broth and adjust to taste.'],['Finish','Add kangkong and season with fish sauce.']]
       },
       {
-        id:'leche-flan',
-        title:'Leche Flan',
-        category:'Dessert',
-        tags:['Dessert','Easy'],
-        region:'Nationwide',
-        difficulty:'Easy',
-        time:'1 hr 10 mins',
-        servings:'8 servings',
-        description:'Silky steamed custard with a deep caramel topping—a Filipino celebration classic.',
+        id:'leche-flan', title:'Leche Flan', category:'Dessert', tags:['Dessert','Easy','Celebration'], region:'Nationwide',
+        difficulty:'Easy', time:'1 hr 10 mins', servings:'8 servings', description:'Silky steamed custard with a deep caramel topping—a Filipino celebration classic.',
         image:'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=1200&q=85',
         ingredients:['10 egg yolks','1 can condensed milk','1 can evaporated milk','1 tsp vanilla','¾ cup sugar for caramel','2 tbsp water'],
-        steps:[
-          ['Make caramel','Melt sugar and water in a pan over low heat until amber. Pour into a llanera or small mold.'],
-          ['Mix gently','Combine egg yolks, condensed milk, evaporated milk, and vanilla. Stir gently to avoid too many bubbles.'],
-          ['Strain','Pass the custard through a fine sieve for a smoother texture.'],
-          ['Steam','Pour into the mold, cover with foil, and steam for about 35–45 minutes.'],
-          ['Chill & unmold','Cool completely, refrigerate, then invert onto a plate and let the caramel run over the flan.']
-        ]
+        steps:[['Make caramel','Melt sugar and water until amber and pour into a mold.'],['Mix gently','Combine yolks, milks, and vanilla without whipping in air.'],['Strain','Pass the custard through a fine sieve.'],['Steam','Cover and steam about 35–45 minutes.'],['Chill & unmold','Cool, refrigerate, then invert onto a plate.']]
+      },
+      {
+        id:'pancit-canton', title:'Pancit Canton', category:'Noodles', tags:['Noodles','Easy','Quick'], region:'Luzon',
+        difficulty:'Easy', time:'35 mins', servings:'4 servings', description:'Stir-fried egg noodles tossed with vegetables, chicken, and savory sauce.',
+        image:'https://images.unsplash.com/photo-1557872943-16a5ac26437e?auto=format&fit=crop&w=1200&q=85',
+        ingredients:['400 g pancit canton noodles','250 g chicken breast, sliced','1 carrot, julienned','1 cup cabbage, sliced','½ cup green beans','4 cloves garlic','1 onion','¼ cup soy sauce','1 cup chicken stock','2 tbsp cooking oil'],
+        steps:[['Cook aromatics','Sauté garlic and onion in oil.'],['Cook chicken','Add chicken and stir-fry until cooked through.'],['Add vegetables','Toss in carrot, beans, and cabbage.'],['Sauce it','Add soy sauce and stock and bring to a simmer.'],['Toss noodles','Add noodles and stir-fry until the sauce is absorbed.']]
+      },
+      {
+        id:'sisig', title:'Sizzling Pork Sisig', category:'Pork', tags:['Pork','Grilled','Pulutan'], region:'Luzon',
+        difficulty:'Medium', time:'1 hr 20 mins', servings:'4 servings', description:'Crispy chopped pork with calamansi, onion, chili, and a sizzling finish.',
+        image:'https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=1200&q=85',
+        ingredients:['700 g pork belly or cheeks','1 onion, finely chopped','3 cloves garlic','2–3 chilies, sliced','2 tbsp soy sauce','2 tbsp calamansi juice','1 tbsp mayonnaise, optional','Salt and pepper'],
+        steps:[['Boil the pork','Simmer pork until tender, then drain and dry well.'],['Char it','Grill or pan-sear until the outside is deeply browned.'],['Chop','Finely chop the pork and set aside.'],['Season','Toss with onion, garlic, chili, soy sauce, and calamansi.'],['Sizzle','Cook briefly on a hot pan or sizzling plate and serve.']]
+      },
+      {
+        id:'tinola', title:'Chicken Tinola', category:'Soup', tags:['Chicken','Soup','Healthy'], region:'Luzon',
+        difficulty:'Easy', time:'50 mins', servings:'4 servings', description:'Light ginger broth with tender chicken, green papaya, and leafy greens.',
+        image:'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=1200&q=85',
+        ingredients:['1 kg chicken pieces','1 thumb ginger, sliced','1 onion, sliced','4 cloves garlic','1 green papaya, sliced','2 cups chili leaves or malunggay','6 cups water','2 tbsp fish sauce','1 tbsp cooking oil'],
+        steps:[['Sauté aromatics','Cook garlic, onion, and ginger until fragrant.'],['Brown chicken','Add chicken and cook until lightly browned.'],['Add broth','Pour in water and simmer until chicken is tender.'],['Add papaya','Cook green papaya until just tender.'],['Finish','Add leafy greens and fish sauce; cook 1–2 minutes.']]
+      },
+      {
+        id:'menudo', title:'Pork Menudo', category:'Pork', tags:['Pork','Dinner','Meal Prep'], region:'Luzon',
+        difficulty:'Medium', time:'1 hr 10 mins', servings:'6 servings', description:'Tomato-rich pork stew with potatoes, carrots, liver, and bright bell peppers.',
+        image:'https://images.unsplash.com/photo-1601050690117-94f5f6fa8bd7?auto=format&fit=crop&w=1200&q=85',
+        ingredients:['700 g pork shoulder, cubed','200 g pork liver, cubed','2 potatoes, cubed','2 carrots, cubed','1 bell pepper','1 onion','5 cloves garlic','1 cup tomato sauce','1 cup water','2 tbsp soy sauce'],
+        steps:[['Brown pork','Sear pork cubes until lightly browned.'],['Sauté aromatics','Add garlic and onion and cook until soft.'],['Simmer','Add tomato sauce, water, and soy sauce; simmer until tender.'],['Add vegetables','Add potatoes and carrots until cooked.'],['Finish','Add liver and bell pepper and cook briefly.']]
+      },
+      {
+        id:'caldereta', title:'Beef Caldereta', category:'Beef', tags:['Beef','Special Occasion','Dinner'], region:'Luzon',
+        difficulty:'Medium', time:'1 hr 45 mins', servings:'6 servings', description:'Slow-simmered beef in a rich tomato sauce with vegetables and a creamy, savory finish.',
+        image:'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=85',
+        ingredients:['1 kg beef chuck, cubed','1 onion','5 cloves garlic','1½ cups tomato sauce','2 cups beef stock','2 potatoes','2 carrots','1 bell pepper','2 tbsp peanut butter','2 tbsp cooking oil'],
+        steps:[['Brown beef','Sear beef in batches until browned.'],['Sauté base','Cook garlic and onion until fragrant.'],['Simmer','Add tomato sauce and stock; cover and simmer until tender.'],['Add vegetables','Add potatoes and carrots and cook until tender.'],['Enrich','Stir in peanut butter and bell pepper and simmer briefly.']]
+      },
+      {
+        id:'bangus-relyeno', title:'Relyenong Bangus', category:'Seafood', tags:['Seafood','Celebration'], region:'Visayas',
+        difficulty:'Hard', time:'2 hrs', servings:'6 servings', description:'Stuffed milkfish with savory sautéed filling, prepared for special family occasions.',
+        image:'https://images.unsplash.com/photo-1516685018646-549198525c1b?auto=format&fit=crop&w=1200&q=85',
+        ingredients:['1 large bangus, cleaned','1 onion, chopped','4 cloves garlic','1 carrot, minced','1 bell pepper, minced','2 eggs, beaten','½ cup breadcrumbs','2 tbsp soy sauce','Cooking oil'],
+        steps:[['Prepare fish','Carefully remove the fish meat and keep the skin intact.'],['Cook filling','Sauté garlic, onion, carrot, and pepper, then mix with flaked fish.'],['Bind','Add eggs, breadcrumbs, and soy sauce.'],['Stuff','Fill the fish skin evenly and secure the opening.'],['Cook','Bake or fry until golden and cooked through, then slice.']]
+      },
+      {
+        id:'laing', title:'Laing', category:'Vegetable', tags:['Vegetable','Spicy','Budget'], region:'Bicol',
+        difficulty:'Easy', time:'45 mins', servings:'5 servings', description:'Slow-cooked taro leaves in coconut milk with shrimp paste and chili.',
+        image:'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=1200&q=85',
+        ingredients:['2 cups dried taro leaves','2 cups coconut milk','1 cup coconut cream','4 cloves garlic','1 onion','1 thumb ginger','2 tbsp bagoong alamang','4–6 chilies'],
+        steps:[['Start aromatics','Combine garlic, onion, ginger, and bagoong.'],['Add coconut milk','Pour in coconut milk and bring to a gentle simmer.'],['Add leaves','Add taro leaves and let them soften without vigorous stirring.'],['Add heat','Add chilies and simmer until tender.'],['Finish','Pour in coconut cream and cook until thick and rich.']]
+      },
+      {
+        id:'pinakbet', title:'Pinakbet', category:'Vegetable', tags:['Vegetable','Healthy','Budget'], region:'Ilocos',
+        difficulty:'Easy', time:'40 mins', servings:'4 servings', description:'Colorful vegetables cooked with bagoong for a simple, deeply savory Filipino classic.',
+        image:'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1200&q=85',
+        ingredients:['1 cup squash, cubed','1 cup eggplant','1 cup bitter melon','1 cup okra','1 cup string beans','1 tomato','1 onion','4 cloves garlic','2 tbsp bagoong','½ cup water'],
+        steps:[['Sauté base','Cook garlic, onion, and tomato until soft.'],['Add savory flavor','Stir in bagoong and water.'],['Layer vegetables','Add squash first, then eggplant and the firmer vegetables.'],['Cover','Steam-cook until vegetables are tender but not mushy.'],['Serve','Taste and adjust seasoning before serving with rice.']]
+      },
+      {
+        id:'batchoy', title:'La Paz Batchoy', category:'Noodles', tags:['Noodles','Soup','Comfort Food'], region:'Visayas',
+        difficulty:'Medium', time:'1 hr 30 mins', servings:'4 servings', description:'Iloilo-style noodle soup with pork, liver, egg noodles, and aromatic broth.',
+        image:'https://images.unsplash.com/photo-1562565652-a0d8f0c59eb4?auto=format&fit=crop&w=1200&q=85',
+        ingredients:['300 g pork shoulder','150 g pork liver','300 g fresh egg noodles','1.5 L pork stock','1 onion','5 cloves garlic','1 tsp shrimp paste','Spring onions','Crushed pork cracklings'],
+        steps:[['Build stock','Simmer pork with stock, onion, and garlic until tender.'],['Cook liver','Add sliced liver and cook gently.'],['Season','Stir in a little shrimp paste to deepen the broth.'],['Add noodles','Cook egg noodles separately or directly in the broth.'],['Garnish','Top with pork, spring onions, and crushed cracklings.']]
+      },
+      {
+        id:'chicken-barbecue', title:'Pinoy Chicken Barbecue', category:'Chicken', tags:['Chicken','Grilled','Easy'], region:'Nationwide',
+        difficulty:'Easy', time:'1 hr', servings:'4 servings', description:'Sweet-savory skewers with soy sauce, citrus, garlic, and a caramelized glaze.',
+        image:'https://images.unsplash.com/photo-1527477396000-e27163b481c2?auto=format&fit=crop&w=1200&q=85',
+        ingredients:['1 kg boneless chicken thighs','½ cup soy sauce','¼ cup banana ketchup','¼ cup calamansi juice','4 cloves garlic','2 tbsp brown sugar','1 tbsp oil','Bamboo skewers'],
+        steps:[['Marinate','Mix all marinade ingredients and coat the chicken.'],['Skewer','Thread chicken pieces onto soaked skewers.'],['Grill','Cook over medium heat, turning often.'],['Baste','Brush with reserved marinade while cooking, making sure raw marinade is cooked through.'],['Finish','Grill until charred at the edges and serve hot.']]
+      },
+      {
+        id:'halo-halo', title:'Halo-Halo', category:'Dessert', tags:['Dessert','Cold','Easy'], region:'Nationwide',
+        difficulty:'Easy', time:'15 mins', servings:'2 servings', description:'A colorful icy dessert layered with sweet fruits, beans, jellies, milk, and ube.',
+        image:'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=1200&q=85',
+        ingredients:['1 cup shaved ice','½ cup sweetened beans','½ cup nata de coco','½ cup sweet fruit or kaong','2 tbsp ube halaya','Evaporated milk','Leche flan, optional','1 scoop ube or vanilla ice cream, optional'],
+        steps:[['Layer', 'Add fruits, beans, and jellies to a tall glass.'],['Add ice','Pile shaved ice generously on top.'],['Pour milk','Drizzle evaporated milk over the ice.'],['Top','Add ube, flan, and ice cream if desired.'],['Mix & enjoy','Stir from the bottom up before eating.']]
+      },
+      {
+        id:'arroz-caldo', title:'Arroz Caldo', category:'Rice', tags:['Rice','Soup','Comfort Food'], region:'Luzon',
+        difficulty:'Easy', time:'1 hr', servings:'4 servings', description:'Ginger-scented chicken rice porridge topped with toasted garlic, egg, and calamansi.',
+        image:'https://images.unsplash.com/photo-1516685018646-549198525c1b?auto=format&fit=crop&w=1200&q=85',
+        ingredients:['1 cup glutinous rice or regular rice','500 g chicken pieces','1 onion','1 thumb ginger','5 cloves garlic','6 cups chicken stock','2 tbsp fish sauce','4 eggs','Calamansi and spring onions'],
+        steps:[['Sauté aromatics','Cook garlic, onion, and ginger until fragrant.'],['Brown chicken','Add chicken and cook until lightly browned.'],['Add rice & stock','Stir in rice and chicken stock.'],['Simmer','Cook until the rice breaks down into a thick porridge.'],['Finish','Season with fish sauce and top with egg, calamansi, and spring onions.']]
+      },
+      {
+        id:'turon', title:'Turon', category:'Dessert', tags:['Dessert','Snack','Budget'], region:'Nationwide',
+        difficulty:'Easy', time:'30 mins', servings:'6 rolls', description:'Crispy caramelized banana spring rolls, perfect for merienda.',
+        image:'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=1200&q=85',
+        ingredients:['6 saba bananas, halved','½ cup brown sugar','½ cup sliced jackfruit, optional','6 spring roll wrappers','Oil for frying'],
+        steps:[['Fill','Place banana and jackfruit on a wrapper and sprinkle with brown sugar.'],['Roll','Fold tightly and seal the edge with water.'],['Heat oil','Warm enough oil for shallow or deep frying.'],['Fry','Fry until crisp and golden.'],['Caramelize','Let excess oil drain while the sugar coating sets.']]
+      },
+      {
+        id:'ginataang-gulay', title:'Ginataang Gulay', category:'Vegetable', tags:['Vegetable','Budget','Easy'], region:'Nationwide',
+        difficulty:'Easy', time:'35 mins', servings:'4 servings', description:'Creamy coconut vegetables with squash, beans, and chili for everyday ulam.',
+        image:'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=1200&q=85',
+        ingredients:['2 cups squash, cubed','1 cup string beans','1 cup eggplant','2 cups coconut milk','3 cloves garlic','1 onion','2 chilies','1 tbsp bagoong or salt'],
+        steps:[['Sauté','Cook garlic and onion until fragrant.'],['Add vegetables','Add squash, eggplant, and beans and toss briefly.'],['Pour coconut milk','Add coconut milk and bring to a simmer.'],['Season','Add chili and bagoong or salt.'],['Reduce','Simmer until vegetables are tender and the sauce is creamy.']]
       }
     ];
 
     const categories = [
-      ['🍚','Rice & Meals','All'],
-      ['🍲','Soups','Soup'],
-      ['🍗','Chicken','Chicken'],
-      ['🥩','Beef & Pork','Pork'],
-      ['🐟','Seafood','Seafood'],
-      ['🍰','Desserts','Dessert']
+      ['🍚','Rice & Meals','Rice'],['🍲','Soups','Soup'],['🍗','Chicken','Chicken'],
+      ['🥩','Beef & Pork','Beef'],['🐟','Seafood','Seafood'],['🥬','Vegetables','Vegetable'],
+      ['🍜','Noodles','Noodles'],['🍰','Desserts','Dessert']
     ];
 
     const categoryGrid = document.getElementById('categoryGrid');
@@ -745,6 +828,7 @@
             <div class="meta">
               <span>⏱ ${r.time}</span><span>👥 ${r.servings}</span><span>🔥 ${r.difficulty}</span>
             </div>
+            <div class="recipe-extra"><span class="rating">★★★★★ ${r.difficulty==='Easy'?'4.9':'4.8'}</span><span style="font-size:.75rem;color:var(--muted)">🇵🇭 ${r.region}</span></div>
             <button class="view-recipe" data-view="${r.id}">View Recipe →</button>
           </div>
         </article>
@@ -777,6 +861,7 @@
       favorites = favorites.includes(id) ? favorites.filter(x=>x!==id) : [...favorites,id];
       localStorage.setItem('kainTayoFavorites', JSON.stringify(favorites));
       renderRecipes();
+      toast(favorites.includes(id) ? 'Saved to My Favorites ♥' : 'Removed from favorites');
     }
     recipeGrid.addEventListener('click', e => {
       const save = e.target.closest('[data-save]');
@@ -903,6 +988,119 @@
         if(e.key==='ArrowRight') document.getElementById('nextStep').click();
         if(e.key==='ArrowLeft') document.getElementById('prevStep').click();
       }
+    });
+
+
+    // Enhanced app state
+    let servingCount = 4;
+    let shoppingItems = JSON.parse(localStorage.getItem('kainTayoShopping') || '[]');
+    let recent = JSON.parse(localStorage.getItem('kainTayoRecent') || '[]');
+
+    function toast(message){
+      const t=document.getElementById('toast'); t.textContent=message; t.classList.add('show');
+      clearTimeout(window.__toast); window.__toast=setTimeout(()=>t.classList.remove('show'),1900);
+    }
+
+    function showRandomRecipe(){
+      const pool = getFilteredRecipes();
+      const r = pool[Math.floor(Math.random()*pool.length)] || recipes[Math.floor(Math.random()*recipes.length)];
+      openRecipe(r.id);
+    }
+
+    function openShopping(){
+      renderShopping();
+      const d=document.getElementById('shoppingDrawer');
+      d.classList.add('open'); d.setAttribute('aria-hidden','false');
+    }
+    function renderShopping(){
+      const el=document.getElementById('shoppingList');
+      if(!shoppingItems.length){
+        el.innerHTML='<div class="empty" style="padding:26px 12px;border:0">Your shopping list is empty.<br>Add ingredients from any recipe.</div>';
+        return;
+      }
+      el.innerHTML=shoppingItems.map((item,i)=>`<label class="shopping-item"><input type="checkbox" ${item.done?'checked':''} data-shop-check="${i}"><span>${item.text}</span></label>`).join('');
+      el.querySelectorAll('[data-shop-check]').forEach(c=>c.addEventListener('change',e=>{
+        shoppingItems[+e.target.dataset.shopCheck].done=e.target.checked; localStorage.setItem('kainTayoShopping',JSON.stringify(shoppingItems));
+      }));
+    }
+    function addIngredients(r){
+      r.ingredients.forEach(x=>{ if(!shoppingItems.some(i=>i.text===x)) shoppingItems.push({text:x,done:false}); });
+      localStorage.setItem('kainTayoShopping',JSON.stringify(shoppingItems));
+      renderShopping(); toast(`${r.ingredients.length} ingredients added to your list`);
+    }
+
+    // Theme preference
+    if(localStorage.getItem('kainTayoTheme')==='dark') document.documentElement.classList.add('theme-dark');
+    document.getElementById('themeNav').onclick=()=>{
+      document.documentElement.classList.toggle('theme-dark');
+      localStorage.setItem('kainTayoTheme',document.documentElement.classList.contains('theme-dark')?'dark':'light');
+    };
+
+    // Random recipe buttons
+    ['randomBtn','randomNav','heroRandomBtn'].forEach(id=>document.getElementById(id)?.addEventListener('click',showRandomRecipe));
+
+    // Shopping list buttons
+    ['shoppingBtn','shoppingNav'].forEach(id=>document.getElementById(id)?.addEventListener('click',openShopping));
+    document.getElementById('closeShopping').onclick=()=>document.getElementById('shoppingDrawer').classList.remove('open');
+    document.getElementById('clearShopping').onclick=()=>{shoppingItems=[];localStorage.setItem('kainTayoShopping','[]');renderShopping();toast('Shopping list cleared');};
+    document.getElementById('copyShopping').onclick=async()=>{
+      const txt=shoppingItems.map(x=>`☐ ${x.text}`).join('\n');
+      try{await navigator.clipboard.writeText(txt);toast('Shopping list copied');}catch{toast('Copy is not available in this browser');}
+    };
+
+    // Favorites/reset
+    document.getElementById('favoritesBtn').onclick=showFavorites;
+    document.getElementById('clearSearchBtn').onclick=()=>{document.getElementById('searchInput').value='';setFilter('All');};
+
+    // Enhanced recipe open hook: recent recipes
+    const originalOpenRecipe=openRecipe;
+    openRecipe=function(id){
+      originalOpenRecipe(id);
+      recent=[id,...recent.filter(x=>x!==id)].slice(0,6);
+      localStorage.setItem('kainTayoRecent',JSON.stringify(recent));
+    };
+
+    // Serving control and practical recipe actions
+    function scaleIngredient(text){
+      if(!currentRecipe) return text;
+      const base=parseInt((currentRecipe.servings||'4').match(/\d+/)?.[0]||4,10);
+      const factor=servingCount/base;
+      return text.replace(/(^|\s)(\d+(?:\.\d+)?)(?=\s|$)/, (m,lead,num)=>{
+        const scaled=Number(num)*factor;
+        return lead+(Number.isInteger(scaled)?scaled:scaled.toFixed(2).replace(/0+$/,'').replace(/\.$/,''));
+      });
+    }
+    function setServingDisplay(){
+      if(!currentRecipe) return;
+      document.getElementById('servingText').textContent=`${servingCount} servings`;
+      document.getElementById('modalIngredients').innerHTML=currentRecipe.ingredients
+        .map(i=>`<div class="ingredient-item">${scaleIngredient(i)}</div>`).join('');
+    }
+    document.getElementById('servMinus').onclick=()=>{if(servingCount>1){servingCount--;setServingDisplay();}};
+    document.getElementById('servPlus').onclick=()=>{if(servingCount<20){servingCount++;setServingDisplay();}};
+    document.getElementById('addShopBtn').onclick=()=>currentRecipe&&addIngredients(currentRecipe);
+    document.getElementById('shareBtn').onclick=async()=>{
+      if(!currentRecipe) return;
+      const shareData={title:currentRecipe.title,text:`${currentRecipe.title} — KAIN TAYO`,url:location.href};
+      try{if(navigator.share) await navigator.share(shareData); else {await navigator.clipboard.writeText(location.href);toast('Recipe link copied');}}catch{}
+    };
+    document.getElementById('printBtn').onclick=()=>window.print();
+
+    // Reset serving count whenever a new recipe is opened
+    const _openRecipeForServing = openRecipe;
+    openRecipe=function(id){
+      _openRecipeForServing(id);
+      servingCount=parseInt((currentRecipe.servings||'4').match(/\d+/)?.[0]||4,10);
+      setServingDisplay();
+    };
+
+    // Search as-you-type for a smoother browsing experience
+    document.getElementById('searchInput').addEventListener('input',e=>{
+      const q=e.target.value.trim().toLowerCase();
+      if(!q){setFilter('All');return;}
+      document.querySelectorAll('.filter').forEach(btn=>btn.classList.remove('active'));
+      const result=recipes.filter(r=>([r.title,r.category,r.region,r.description,...r.tags,...r.ingredients].join(' ')).toLowerCase().includes(q));
+      renderRecipes(result);
     });
 
     renderRecipes();
